@@ -73,14 +73,13 @@ body {
   border-radius: inherit;
 }
 
-/* Canvas Holográfico */
+/* Canvas Holográfico de Destellos */
 #holo-canvas {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 99;
-  opacity: 0.4;
 }
 
 /* Estructura Minimalista */
@@ -374,7 +373,7 @@ footer {
     <h1>
       <span class="holo-text">Nicolas A. Medina Razo</span>
       <span class="amp holo-text">&amp;</span>
-      <span class="holo-text">Mateo Gabriel Rosado C. Ligtnberg</span>
+      <span class="holo-text">Mateo Gabriel Rodado C. Ligtnberg</span>
     </h1>
     <p class="subtitle">The King of the Fallen Hosts and the Angel of the Divine Presence invite you to witness their celestial union.</p>
     <div class="date-pill holo-border">The date shall be revealed by Heaven</div>
@@ -516,7 +515,7 @@ function consultOracle() {
   }, 300);
 }
 
-// Canvas Holográfico con Partículas Neutras
+// Canvas Holográfico de Destellos Discretos
 const canvas = document.getElementById('holo-canvas');
 const ctx = canvas.getContext('2d');
 let width, height;
@@ -528,34 +527,66 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const colors = ['#43374f', '#605073', '#6d7887', '#719996'];
-let particles = Array.from({length: 40}, () => ({
+const sparkColors = ['#605073', '#6d7887', '#719996', '#43374f'];
+
+// Generación de destellos sutiles
+let sparkles = Array.from({length: 35}, () => ({
   x: Math.random() * width,
   y: Math.random() * height,
-  size: Math.random() * 3 + 1,
-  color: colors[Math.floor(Math.random() * colors.length)],
-  vx: (Math.random() - 0.5) * 0.3,
-  vy: (Math.random() - 0.5) * 0.3
+  size: Math.random() * 4 + 2,
+  maxOpacity: Math.random() * 0.4 + 0.1,
+  opacity: 0,
+  speed: Math.random() * 0.01 + 0.005,
+  state: Math.random() > 0.5 ? 1 : -1,
+  color: sparkColors[Math.floor(Math.random() * sparkColors.length)]
 }));
 
-function drawHoloParticles() {
+function drawSparkle(x, y, size, opacity, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.globalAlpha = opacity;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 0.5;
+
+  // Cruz fina de destello
+  ctx.beginPath();
+  ctx.moveTo(-size * 2, 0);
+  ctx.lineTo(size * 2, 0);
+  ctx.moveTo(0, -size * 2);
+  ctx.lineTo(0, size * 2);
+  ctx.stroke();
+
+  // Centro suave
+  ctx.beginPath();
+  ctx.arc(0, 0, size * 0.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function animateSparkles() {
   ctx.clearRect(0, 0, width, height);
 
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < 0 || p.x > width) p.vx *= -1;
-    if (p.y < 0 || p.y > height) p.vy *= -1;
+  sparkles.forEach(s => {
+    s.opacity += s.speed * s.state;
 
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
-    ctx.fill();
+    if (s.opacity >= s.maxOpacity) {
+      s.state = -1;
+    } else if (s.opacity <= 0) {
+      s.state = 1;
+      s.x = Math.random() * width;
+      s.y = Math.random() * height;
+      s.maxOpacity = Math.random() * 0.4 + 0.1;
+      s.color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+    }
+
+    drawSparkle(s.x, s.y, s.size, s.opacity, s.color);
   });
 
-  requestAnimationFrame(drawHoloParticles);
+  requestAnimationFrame(animateSparkles);
 }
-drawHoloParticles();
+animateSparkles();
 </script>
 </body>
 </html>
